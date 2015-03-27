@@ -1,0 +1,13 @@
+<CubeDefinition>
+  <DataSource>
+    JdbcDrivers=com.mysql.jdbc.Driver;Provider=Mondrian;Jdbc=jdbc:mysql://localhost:3306/foodmart?user=foodmart&#38;password=temp;
+  </DataSource>
+  <Cube name="Sales 212">
+    <Dimension name="Gender" foreignKey="customer_id">
+      <Hierarchy hasAll="true" allMemberName="All Gender" primaryKey="customer_id">
+        <Table name="customer"/>
+        <Level name="Gender" column="gender" uniqueMembers="true"/>
+      </Hierarchy>
+    </Dimension>
+  </Cube>
+</CubeDefinition>
