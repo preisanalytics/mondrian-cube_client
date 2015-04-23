@@ -33,9 +33,9 @@ module Mondrian
 
       def create(catalog_name,cube_name, xml)
         put_path="#{@url.path}/putcube/#{catalog_name}/#{cube_name}"
-        req = Net::HTTP::Put.new(put_path, initheader = { 'Content-Type' => 'text/plain'})
+        req = Net::HTTP::Put.new(put_path, initheader = {'Content-Type' => 'text/plain'})
         req.body = xml
-        resp = Net::HTTP.new(@url.host, @url.port).start {|http| http.request(req) }
+        resp = Net::HTTP.new(@url.host, @url.port).start {|http| http.request(req)}
         resp.body.strip
       end
 
@@ -51,6 +51,20 @@ module Mondrian
         del_path = "#{@url.path}/deletecube/#{catalog_name}/#{cube_name}"
         http = Net::HTTP.new(@url.host, @url.port)    
         resp = http.send_request('DELETE', del_path) 
+        resp.body.strip
+      end
+
+      def invalidate_cache_catalog(catalog_name)
+        put_path="#{@url.path}/invalidatecache/catalog/#{catalog_name}"
+        req = Net::HTTP::Put.new(put_path, initheader = { 'Content-Type' => 'text/plain'})
+        resp = Net::HTTP.new(@url.host, @url.port).start {|http| http.request(req) }        
+        resp.body.strip
+      end
+
+      def invalidate_cache_cube(cube_name)
+        put_path="#{@url.path}/invalidatecache/cube/#{cube_name}"
+        req = Net::HTTP::Put.new(put_path, initheader = { 'Content-Type' => 'text/plain'})
+        resp = Net::HTTP.new(@url.host, @url.port).start {|http| http.request(req) }        
         resp.body.strip
       end
 

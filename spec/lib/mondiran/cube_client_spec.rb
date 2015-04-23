@@ -50,4 +50,16 @@ RSpec.describe Mondrian::CubeClient do
       expect(connection.delete('mycat','mycube')).not_to be_empty
     end
   end
+
+  describe 'invalidate cache for a cube' do
+    it "invalidates cache for a cube" do
+      expect(connection.invalidate_cache_cube('mycube')).not_to be_empty
+    end
+  end
+
+  describe 'invalidate cache for a catalog' do
+    it "invalidates cache for a catalog" do
+      expect(connection.invalidate_cache_catalog('mycat')).not_to be_empty
+    end
+  end
 end
