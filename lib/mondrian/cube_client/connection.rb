@@ -6,9 +6,22 @@ module Mondrian
   module CubeClient
     class Connection
 
-      attr_reader :base_url, :list_objs
+      attr_reader :base_url, :list_objs, :error
+
+      def active_connection?(base_url)
+        begin
+          response = Net::HTTP.get_response(URI.parse(base_url))
+          response.code() == '200'
+        rescue Exception
+          return false
+        end
+      end
 
       def initialize(base_url)
+         unless active_connection?(base_url)
+           @error = "connection is not active"
+           return
+         end
         @base_url=base_url
         @url=URI.parse(base_url)
       end
