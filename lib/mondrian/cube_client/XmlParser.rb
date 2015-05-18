@@ -1,7 +1,7 @@
 require 'nokogiri'
 require_relative 'cube'
 
-begin
+
 
   class MyParser < Nokogiri::XML::SAX::Document
     bcatalog = false
@@ -31,17 +31,10 @@ begin
 
         if name.eql?("Catalog")
           bcatalog = true
-          attrs.each{ |attribute|
-            if attribute.at(0).eql?("name")
-              @catalog_name = attribute.at(1)
-              # puts "Catalog is #{ @catalog_name }"
-            end
-
-            if attribute.at(0).eql?("datasourceinfo")
-              @data_source_info_str = attribute.at(1)
-              # puts "datasourceinfo is #{ @data_source_info_str }"
-            end
-          }
+          attrs.each do |attribute|
+              @catalog_name = attribute.at(1) if attribute.at(0).eql?("name")
+              @data_source_info_str = attribute.at(1) if attribute.at(0).eql?("datasourceinfo")
+          end
         end
 
       end
@@ -69,7 +62,6 @@ begin
   end
   
 
-end
 
 
 

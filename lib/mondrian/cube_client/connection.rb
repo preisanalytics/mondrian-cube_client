@@ -1,27 +1,31 @@
 require 'net/http'
 require 'nokogiri'
 require_relative "XmlParser"
+#require_relative '../../../data/mondrian/templates/cube_definition_template.xml'
+require 'pathname'
+
+CREATE_CUBE_TEMPLATE_PATH = File.expand_path("../../../../data/mondrian/templates/cube_definition_template.xml",
+                                             __FILE__)
+
 
 module Mondrian
   module CubeClient
+
+    # handles the mondrian connection
+    # example: Mondrian::CubeClient::Connection.new("http://localhost:8080")
     class Connection
 
       attr_reader :base_url, :list_objs, :error
 
-      def active_connection?(base_url)
+      def alive?
         begin
-          response = Net::HTTP.get_response(URI.parse(base_url))
-          response.code() == '200'
-        rescue Exception
+          Net::HTTP.get_response(@url).code == '200'
+        rescue Errno::ECONNREFUSED
           return false
         end
       end
 
       def initialize(base_url)
-         unless active_connection?(base_url)
-           @error = "connection is not active"
-           return
-         end
         @base_url=base_url
         @url=URI.parse(base_url)
       end
@@ -44,7 +48,8 @@ module Mondrian
         response_xml  
       end
 
-      def create(catalog_name,cube_name, xml)
+      def create(catalog_name,cube_name, connect_string)
+        xml = prepare_request(cube_name, connect_string)
         put_path="#{@url.path}/putcube/#{catalog_name}/#{cube_name}"
         req = Net::HTTP::Put.new(put_path, initheader = {'Content-Type' => 'text/plain'})
         req.body = xml
@@ -82,15 +87,20 @@ module Mondrian
       end
 
       def parse_response(response_xml)
-        puts "The response_xml is #{response_xml}"
-        puts ""
         myparser = MyParser.new()
         parser = Nokogiri::XML::SAX::Parser.new(myparser)         
         parser.parse(response_xml)
-        puts "Inspecting = #{parser.inspect}"
         @list_objs = myparser.list_catalogs
         @list_objs.push(response_xml)
         puts "the array value for #{@list_objs}"        
+      end
+
+      def prepare_request(cube_name, connect_string)
+        puts("directory is #{CREATE_CUBE_TEMPLATE_PATH}")
+        cubedefinition = File.read(CREATE_CUBE_TEMPLATE_PATH)
+        cubedefinition.sub! '@cube_name@', cube_name
+        cubedefinition.sub! '@data_source@', connect_string
+        cubedefinition
       end
     end
   end
