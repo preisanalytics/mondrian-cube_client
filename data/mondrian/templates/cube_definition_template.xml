@@ -1,0 +1,11 @@
+<CubeDefinition>
+  <DataSource>@data_source@</DataSource>
+  <Cube name="@cube_name@">
+    <Dimension name="Gender" foreignKey="customer_id">
+      <Hierarchy hasAll="true" allMemberName="All Gender" primaryKey="customer_id">
+        <Table name="customer"/>
+        <Level name="Gender" column="gender" uniqueMembers="true"/>
+      </Hierarchy>
+    </Dimension>
+  </Cube>
+</CubeDefinition>
