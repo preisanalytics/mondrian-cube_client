@@ -7,11 +7,11 @@ RSpec.describe Mondrian::CubeClient do
     File.read(RSPEC_APP_PATH.join('fixtures','cube_definition.xml'))
   }
   let(:connection) {
-    Mondrian::CubeClient.connection( RSPEC_TEST_URL + "/mondrian/cubecrudapi")
+    Mondrian::CubeClient.connection( RSPEC_TEST_URL + "/mondrian/keepalive.html")
   }
   
     it "sets the host and port for a connection" do
-      expect(connection.base_url).to eq( RSPEC_TEST_URL + "/mondrian/cubecrudapi")
+      expect(connection.base_url).to eq( RSPEC_TEST_URL + "/mondrian/keepalive.html")
     end
 
   describe 'show cube for given catalog name' do
