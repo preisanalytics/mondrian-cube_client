@@ -42,16 +42,12 @@ require_relative 'cube'
 
     def end_element name
       if name.eql?("Catalog")
-        puts "Catalog ends with #{@catalog_name}"
         temp_list_cubes = @list_cubes.clone
-        # puts "temp list of cubes #{temp_list_cubes}"
         catalog_obj = Mondrian::CubeClient::Catalog.new(@catalog_name, @data_source_info_str, temp_list_cubes)
-        puts "Printing catalog list #{@list_catalogs.inspect}"
         @list_catalogs.push(catalog_obj)
         @catalog_name = ""
         @data_source_info_str = ""
         @list_cubes.clear
-        puts "Printing catalog list after #{@list_catalogs.inspect}"
       end
 
       # if name.eql?("Cube")

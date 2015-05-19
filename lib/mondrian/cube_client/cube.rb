@@ -1,7 +1,7 @@
 module Mondrian
   module CubeClient
     class Cube
-      attr_writer :connection, :catalog_name, :name
+      attr_accessor :connection, :catalog_name, :name
       def initialize(connection, catalog_name, name)
         @connection = connection
         @catalog_name = catalog_name
@@ -10,7 +10,7 @@ module Mondrian
     end
 
     class Catalog
-      attr_writer :name, :list_cubes, :data_source_info
+      attr_accessor :name, :list_cubes, :data_source_info
         def initialize(name, data_source_info, list_cubes)
           @name = name
           @data_source_info = data_source_info

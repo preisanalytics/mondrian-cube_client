@@ -6,7 +6,5 @@ module Mondrian
     def self.connection(url)
       Connection.new(url)
     end
-
-   # Your code goes here...
   end
 end

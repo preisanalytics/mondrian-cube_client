@@ -17,11 +17,13 @@
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 
-require_relative '../lib/mondrian/cube_client'
+# require_relative '../lib/mondrian/cube_client'
 require 'pathname'
+require 'webmock/rspec'
 
 RSPEC_APP_PATH=Pathname.new(File.dirname(__FILE__))
 
+WebMock#disable_net_connect!
 RSpec.configure do |config|
   
 
