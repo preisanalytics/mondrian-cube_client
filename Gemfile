@@ -5,3 +5,4 @@ gemspec
 
 gem 'webmock'
 gem 'byebug'
+gem 'rspec-core'
