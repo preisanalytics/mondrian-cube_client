@@ -42,13 +42,13 @@ module Mondrian
         url = ""
         case
           when ((catalog_name.nil? || catalog_name.empty?) && (cube_name.nil? || cube_name.empty?))
-            url = "#{base_url}/cubes"
+            url = "#{base_url}/mondrian/cubecrudapi/cubes"
           when ((catalog_name.nil? || catalog_name.empty?) && !(cube_name.nil? || cube_name.empty?))
-            url = "#{base_url}/cube/#{cube_name}"
+            url = "#{base_url}/mondrian/cubecrudapi/cube/#{cube_name}"
           when (!(catalog_name.nil? || catalog_name.empty?) && (cube_name.nil? || cube_name.empty?))
-            url = "#{base_url}/catalog/#{catalog_name}"
+            url = "#{base_url}/mondrian/cubecrudapi/catalog/#{catalog_name}"
           else
-            url = "#{base_url}/cube/#{catalog_name}/#{cube_name}"
+            url = "#{base_url}/mondrian/cubecrudapi/cube/#{catalog_name}/#{cube_name}"
         end
         resp = Net::HTTP.get_response(URI.parse(url))
         response_xml = resp.body.strip
