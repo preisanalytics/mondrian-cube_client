@@ -4,9 +4,8 @@ require_relative "XmlParser"
 require 'pathname'
 require 'byebug'
 
-CREATE_CUBE_TEMPLATE_PATH = File.expand_path("../../../../data/mondrian/templates/cube_definition_template.xml",
-                                             __FILE__)
-
+CREATE_CUBE_TEMPLATE_PATH = File.expand_path("../../../../data/mondrian/templates/cube_definition_template.xml", __FILE__)
+CREATE_CATALOG_TEMPLATE_PATH = File.expand_path("../../../../data/mondrian/templates/catalog_pgresconnect_definition_template.xml", __FILE__)
 
 module Mondrian
   module CubeClient
@@ -58,7 +57,16 @@ module Mondrian
 
       def create(catalog_name,cube_name, connect_string)
         xml = prepare_request(cube_name, connect_string)
-        put_path="#{@url.path}/putcube/#{catalog_name}/#{cube_name}"
+        put_path="#{@url.path}/mondrian/cubecrudapi/putcube/#{catalog_name}/#{cube_name}"
+        req = Net::HTTP::Put.new(put_path, initheader = {'Content-Type' => 'text/plain'})
+        req.body = xml
+        resp = Net::HTTP.new(@url.host, @url.port).start {|http| http.request(req)}
+        resp.body.strip
+      end
+
+      def create_catalog(catalog_name, connect_string)
+        xml = prepare_request_catalog(connect_string)
+        put_path="#{@url.path}/mondrian/cubecrudapi/catalog/#{catalog_name}"
         req = Net::HTTP::Put.new(put_path, initheader = {'Content-Type' => 'text/plain'})
         req.body = xml
         resp = Net::HTTP.new(@url.host, @url.port).start {|http| http.request(req)}
@@ -66,7 +74,7 @@ module Mondrian
       end
 
       def update(catalog_name, cube_name, xml)
-        put_path="#{@url.path}/putcube/#{catalog_name}/#{cube_name}"
+        put_path="#{@url.path}/mondrian/cubecrudapi/putcube/#{catalog_name}/#{cube_name}"
         req = Net::HTTP::Put.new(put_path, initheader = { 'Content-Type' => 'text/plain'})
         req.body = xml
         resp = Net::HTTP.new(@url.host, @url.port).start {|http| http.request(req) }
@@ -74,21 +82,21 @@ module Mondrian
       end
 
       def delete(catalog_name,cube_name)
-        del_path = "#{@url.path}/deletecube/#{catalog_name}/#{cube_name}"
+        del_path = "#{@url.path}/mondrian/cubecrudapi/deletecube/#{catalog_name}/#{cube_name}"
         http = Net::HTTP.new(@url.host, @url.port)
         resp = http.send_request('DELETE', del_path)
         resp.body.strip
       end
 
       def invalidate_cache_catalog(catalog_name)
-        put_path="#{@url.path}/invalidatecache/catalog/#{catalog_name}"
+        put_path="#{@url.path}/mondrian/cubecrudapi/invalidatecache/catalog/#{catalog_name}"
         req = Net::HTTP::Put.new(put_path, initheader = { 'Content-Type' => 'text/plain'})
         resp = Net::HTTP.new(@url.host, @url.port).start {|http| http.request(req) }
         resp.body.strip
       end
 
       def invalidate_cache_cube(cube_name)
-        put_path="#{@url.path}/invalidatecache/cube/#{cube_name}"
+        put_path="#{@url.path}/mondrian/cubecrudapi/invalidatecache/cube/#{cube_name}"
         req = Net::HTTP::Put.new(put_path, initheader = { 'Content-Type' => 'text/plain'})
         resp = Net::HTTP.new(@url.host, @url.port).start {|http| http.request(req) }
         resp.body.strip
@@ -107,6 +115,12 @@ module Mondrian
         cubedefinition.sub! '@cube_name@', cube_name
         cubedefinition.sub! '@data_source@', connect_string
         cubedefinition
+      end
+
+      def prepare_request_catalog(connect_string)
+        catalog_definition = File.read(CREATE_CATALOG_TEMPLATE_PATH)
+        catalog_definition.sub! '@connectstring@', connect_string
+        catalog_definition
       end
     end
   end

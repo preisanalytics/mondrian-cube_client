@@ -30,6 +30,10 @@ Jdbc=jdbc:mysql://localhost:3306/foodmart?user=foodmart&#38;password=temp;Catalo
 
   let(:success_create_response) { "<output>Cube is successfully added to an existing catalog.</output>" }
 
+  let(:success_create_catalog_response) { "<output>Catalog creation was successful</output>" }
+
+  let(:failure_create_catalog_response) { "<output>Catalog mycat already exists</output>" }
+
   let(:success_del_response) { "<output>Cube successfully deleted</output>" }
 
   let(:success_invalidatecache_cube_response) { "<output>Cache clearance for Cube mycube is successful</output>" }
@@ -103,7 +107,7 @@ Jdbc=jdbc:mysql://localhost:3306/foodmart?user=foodmart&#38;password=temp;Catalo
 
   describe 'update cube' do
     it "updates a cube's definition" do
-      stub_request(:put, "http://validurl:8080/putcube/mycat/mycube").
+      stub_request(:put, "http://validurl:8080/mondrian/cubecrudapi/putcube/mycat/mycube").
           with(:body => "<CubeDefinition>\n  <DataSource>\n    JdbcDrivers=com.mysql.jdbc.Driver;Provider=Mondrian;Jdbc=jdbc:mysql://localhost:3306/foodmart?user=foodmart&#38;password=temp;\n  </DataSource>\n  <Cube name=\"Sales 212\">\n    <Dimension name=\"Gender\" foreignKey=\"customer_id\">\n      <Hierarchy hasAll=\"true\" allMemberName=\"All Gender\" primaryKey=\"customer_id\">\n        <Table name=\"customer\"/>\n        <Level name=\"Gender\" column=\"gender\" uniqueMembers=\"true\"/>\n      </Hierarchy>\n    </Dimension>\n  </Cube>\n</CubeDefinition>",
                :headers => {'Accept' => '*/*', 'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Content-Type' => 'text/plain', 'User-Agent' => 'Ruby'}).
           to_return(:status => 200, :body => success_update_reponse, :headers => {})
@@ -115,7 +119,7 @@ Jdbc=jdbc:mysql://localhost:3306/foodmart?user=foodmart&#38;password=temp;Catalo
 
   describe 'creates cube' do
     it "creates a cube" do
-      stub_request(:put, "http://validurl:8080/putcube/mycat/mycube").with(:body => "<CubeDefinition>\n  <DataSource><CubeDefinition>\n  <DataSource>\n    JdbcDrivers=com.mysql.jdbc.Driver;Provider=Mondrian;Jdbc=jdbc:mysql://localhost:3306/foodmart?user=foodmart&#38;password=temp;\n  </DataSource>\n  <Cube name=\"Sales 212\">\n    <Dimension name=\"Gender\" foreignKey=\"customer_id\">\n      <Hierarchy hasAll=\"true\" allMemberName=\"All Gender\" primaryKey=\"customer_id\">\n        <Table name=\"customer\"/>\n        <Level name=\"Gender\" column=\"gender\" uniqueMembers=\"true\"/>\n      </Hierarchy>\n    </Dimension>\n  </Cube>\n</CubeDefinition></DataSource>\n  <Cube name=\"mycube\">\n    <Dimension name=\"Gender\" foreignKey=\"customer_id\">\n      <Hierarchy hasAll=\"true\" allMemberName=\"All Gender\" primaryKey=\"customer_id\">\n        <Table name=\"customer\"/>\n        <Level name=\"Gender\" column=\"gender\" uniqueMembers=\"true\"/>\n      </Hierarchy>\n    </Dimension>\n  </Cube>\n</CubeDefinition>", :headers => {'Accept' => '*/*', 'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Content-Type' => 'text/plain', 'User-Agent' => 'Ruby'}).to_return(:status => 200, :body => success_create_response, :headers => {})
+      stub_request(:put, "http://validurl:8080/mondrian/cubecrudapi/putcube/mycat/mycube").with(:body => "<CubeDefinition>\n  <DataSource><CubeDefinition>\n  <DataSource>\n    JdbcDrivers=com.mysql.jdbc.Driver;Provider=Mondrian;Jdbc=jdbc:mysql://localhost:3306/foodmart?user=foodmart&#38;password=temp;\n  </DataSource>\n  <Cube name=\"Sales 212\">\n    <Dimension name=\"Gender\" foreignKey=\"customer_id\">\n      <Hierarchy hasAll=\"true\" allMemberName=\"All Gender\" primaryKey=\"customer_id\">\n        <Table name=\"customer\"/>\n        <Level name=\"Gender\" column=\"gender\" uniqueMembers=\"true\"/>\n      </Hierarchy>\n    </Dimension>\n  </Cube>\n</CubeDefinition></DataSource>\n  <Cube name=\"mycube\">\n    <Dimension name=\"Gender\" foreignKey=\"customer_id\">\n      <Hierarchy hasAll=\"true\" allMemberName=\"All Gender\" primaryKey=\"customer_id\">\n        <Table name=\"customer\"/>\n        <Level name=\"Gender\" column=\"gender\" uniqueMembers=\"true\"/>\n      </Hierarchy>\n    </Dimension>\n  </Cube>\n</CubeDefinition>", :headers => {'Accept' => '*/*', 'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Content-Type' => 'text/plain', 'User-Agent' => 'Ruby'}).to_return(:status => 200, :body => success_create_response, :headers => {})
 
       expect(connection.create('mycat', 'mycube', cubedefinition).include?("successfully added")).to be true
     end
@@ -123,7 +127,7 @@ Jdbc=jdbc:mysql://localhost:3306/foodmart?user=foodmart&#38;password=temp;Catalo
 
   describe 'delete cube' do
     it "deletes a cube" do
-      stub_request(:delete, "http://validurl:8080/deletecube/mycat/mycube").
+      stub_request(:delete, "http://validurl:8080/mondrian/cubecrudapi/deletecube/mycat/mycube").
           to_return(:status => 200, :body => success_del_response, :headers => {})
       expect(connection.delete('mycat', 'mycube').include?("successfully delete")).to be true
     end
@@ -131,7 +135,7 @@ Jdbc=jdbc:mysql://localhost:3306/foodmart?user=foodmart&#38;password=temp;Catalo
 
   describe 'invalidate cache for a cube' do
     it "invalidates cache for a cube" do
-      stub_request(:put, "http://validurl:8080/invalidatecache/cube/mycube").
+      stub_request(:put, "http://validurl:8080/mondrian/cubecrudapi/invalidatecache/cube/mycube").
           with(:headers => {'Accept' => '*/*', 'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Content-Type' => 'text/plain', 'User-Agent' => 'Ruby'}).
           to_return(:status => 200, :body => success_invalidatecache_cube_response, :headers => {})
 
@@ -141,10 +145,32 @@ Jdbc=jdbc:mysql://localhost:3306/foodmart?user=foodmart&#38;password=temp;Catalo
 
   describe 'invalidate cache for a catalog' do
     it "invalidates cache for a catalog" do
-      stub_request(:put, "http://validurl:8080/invalidatecache/catalog/mycat").
+      stub_request(:put, "http://validurl:8080/mondrian/cubecrudapi/invalidatecache/catalog/mycat").
           with(:body => "", :headers => {'Accept' => '*/*', 'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Content-Type' => 'text/plain', 'User-Agent' => 'Ruby'}).
           to_return(:status => 200, :body => success_invalidatecache_cube_response, :headers => {})
       expect(connection.invalidate_cache_catalog('mycat').include?("Cache clearance")).to be true
+    end
+  end
+
+  describe 'creates catalog' do
+    it "creates a catalog" do
+      stub_request(:put, "http://validurl:8080/mondrian/cubecrudapi/catalog/mycat").
+          with(:body => "<CatalogDefinition>\n  <DataSource>\n    JdbcDrivers=org.postgresql.Driver;Provider=Mondrian;Jdbc=jdbc:postgresql://localhost:3306/database_name?user=username&#38;password=password;\n  </DataSource>\n</CatalogDefinition>",
+               :headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Content-Type'=>'text/plain', 'User-Agent'=>'Ruby'}).
+          to_return(:status => 200, :body => success_create_catalog_response, :headers => {})
+
+      connect_string = "localhost:3306/database_name?user=username&#38;password=password;"
+      expect(connection.create_catalog('mycat', connect_string).include?("Catalog creation was successful")).to be true
+    end
+
+    it "does not create a catalog if a catalog already exists" do
+      stub_request(:put, "http://validurl:8080/mondrian/cubecrudapi/catalog/mycat").
+          with(:body => "<CatalogDefinition>\n  <DataSource>\n    JdbcDrivers=org.postgresql.Driver;Provider=Mondrian;Jdbc=jdbc:postgresql://localhost:3306/database_name?user=username&#38;password=password;\n  </DataSource>\n</CatalogDefinition>",
+               :headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Content-Type'=>'text/plain', 'User-Agent'=>'Ruby'}).
+          to_return(:status => 200, :body => failure_create_catalog_response, :headers => {})
+
+      connect_string = "localhost:3306/database_name?user=username&#38;password=password;"
+      expect(connection.create_catalog('mycat', connect_string).include?("already exists")).to be true
     end
   end
 end

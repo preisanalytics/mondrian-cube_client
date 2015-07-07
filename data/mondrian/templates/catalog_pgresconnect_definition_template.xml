@@ -1,0 +1,5 @@
+<CatalogDefinition>
+  <DataSource>
+    JdbcDrivers=org.postgresql.Driver;Provider=Mondrian;Jdbc=jdbc:postgresql://@connectstring@
+  </DataSource>
+</CatalogDefinition>

@@ -22,8 +22,9 @@ require 'pathname'
 require 'webmock/rspec'
 
 RSPEC_APP_PATH=Pathname.new(File.dirname(__FILE__))
-
 WebMock#disable_net_connect!
+# WebMock.disable!
+
 RSpec.configure do |config|
   
 
