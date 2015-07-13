@@ -1,6 +1,7 @@
 require 'spec_helper'
 require_relative '../../../../lib/mondrian/cube_client/connection'
 require 'byebug'
+require 'mondrian/cube_client/connection'
 
 RSPEC_TEST_URL='http://localhost_sample:8080'
 RSpec.describe Mondrian::CubeClient do
@@ -34,6 +35,8 @@ Jdbc=jdbc:mysql://localhost:3306/foodmart?user=foodmart&#38;password=temp;Catalo
 
   let(:failure_create_catalog_response) { "<output>Catalog mycat already exists</output>" }
 
+  let(:failure_get_catalog_response) { "<output>No Catalogs found.</output>" }
+
   let(:success_del_response) { "<output>Cube successfully deleted</output>" }
 
   let(:success_invalidatecache_cube_response) { "<output>Cache clearance for Cube mycube is successful</output>" }
@@ -51,7 +54,7 @@ Jdbc=jdbc:mysql://localhost:3306/foodmart?user=foodmart&#38;password=temp;Catalo
       stub_request(:get, "http://validurl:8080/").
           with(:headers => {'Accept' => '*/*', 'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Host' => 'validurl:8080', 'User-Agent' => 'Ruby'}).
           to_return(:status => 200, :body => nofound_response, :headers => {})
-      expect(connection.get('mycat', 'mycube')).not_to be_empty
+      expect(connection.get_cube('mycat', 'mycube')).not_to be_empty
       expect(connection.list_objs.first.to_s.include? "No Cubes found.").to be true
     end
 
@@ -59,7 +62,7 @@ Jdbc=jdbc:mysql://localhost:3306/foodmart?user=foodmart&#38;password=temp;Catalo
       stub_request(:get, "http://validurl:8080/").
           with(:headers => {'Accept' => '*/*', 'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Host' => 'validurl:8080', 'User-Agent' => 'Ruby'}).
           to_return(:status => 200, :body => success_reponse, :headers => {})
-      expect(connection.get('mycat', 'mycube')).not_to be_empty
+      expect(connection.get_cube('mycat', 'mycube')).not_to be_empty
       connection.list_objs.each { |obj|
         if obj.class.to_s.eql?("Mondrian::CubeClient::Catalog")
           expect(obj.name.eql? "mycat").to be true
@@ -77,7 +80,7 @@ Jdbc=jdbc:mysql://localhost:3306/foodmart?user=foodmart&#38;password=temp;Catalo
       stub_request(:get, "http://validurl:8080/").
           with(:headers => {'Accept' => '*/*', 'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Host' => 'validurl:8080', 'User-Agent' => 'Ruby'}).
           to_return(:status => 200, :body => success_reponse, :headers => {})
-      expect(connection.get('', 'mycube')).not_to be_empty
+      expect(connection.get_cube('', 'mycube')).not_to be_empty
       connection.list_objs.each { |obj|
         if obj.class.to_s.eql?("Mondrian::CubeClient::Catalog")
           expect(obj.name.eql? "mycat").to be true
@@ -95,7 +98,7 @@ Jdbc=jdbc:mysql://localhost:3306/foodmart?user=foodmart&#38;password=temp;Catalo
       stub_request(:get, "http://validurl:8080/").
           with(:headers => {'Accept' => '*/*', 'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Host' => 'validurl:8080', 'User-Agent' => 'Ruby'}).
           to_return(:status => 200, :body => success_multiple_cubes_reponse, :headers => {})
-      expect(connection.get('', '')).not_to be_empty
+      expect(connection.list_cubes()).not_to be_empty
       connection.list_objs.each { |obj|
         if obj.class.to_s.eql?("Mondrian::CubeClient::Catalog")
           expect(obj.name.eql? "mycat").to be true
@@ -160,7 +163,7 @@ Jdbc=jdbc:mysql://localhost:3306/foodmart?user=foodmart&#38;password=temp;Catalo
           to_return(:status => 200, :body => success_create_catalog_response, :headers => {})
 
       connect_string = "localhost:3306/database_name?user=username&#38;password=password;"
-      expect(connection.create_catalog('mycat', connect_string).include?("Catalog creation was successful")).to be true
+      expect(connection.create_catalog('mycat', connect_string)).to be true
     end
 
     it "does not create a catalog if a catalog already exists" do
@@ -170,7 +173,27 @@ Jdbc=jdbc:mysql://localhost:3306/foodmart?user=foodmart&#38;password=temp;Catalo
           to_return(:status => 200, :body => failure_create_catalog_response, :headers => {})
 
       connect_string = "localhost:3306/database_name?user=username&#38;password=password;"
-      expect(connection.create_catalog('mycat', connect_string).include?("already exists")).to be true
+      expect(connection.create_catalog('mycat', connect_string)).to be false
     end
+  end
+
+  describe "show a catalog if present" do
+    it "gets a catalog definition when catalog is present" do
+      stub_request(:get, "http://validurl:8080/").
+          with(:headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Host'=>'validurl:8080', 'User-Agent'=>'Ruby'}).
+          to_return(:status => 200, :body => success_multiple_cubes_reponse, :headers => {})
+      expect(connection.get_catalog('mycat')).not_to be_empty
+      expect(connection.list_objs[0].class).to eq(Mondrian::CubeClient::Catalog)
+      expect(connection.list_objs[0].name.eql?"mycat").to be true
+    end
+
+    it "gets error message when catalog is not found " do
+      stub_request(:get, "http://validurl:8080/").
+          with(:headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Host'=>'validurl:8080', 'User-Agent'=>'Ruby'}).
+          to_return(:status => 200, :body => failure_get_catalog_response, :headers => {})
+      expect(connection.get_catalog('mycat')).not_to be_empty
+      expect(connection.list_objs[0].eql?("<output>No Catalogs found.</output>")).to be true
+    end
+
   end
 end

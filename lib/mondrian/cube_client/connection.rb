@@ -28,24 +28,27 @@ module Mondrian
       end
 
       def initialize(base_url)
-          @base_url=base_url
-          @url= URI.parse(URI.encode(base_url.strip))
+        @base_url=base_url
+        @url= URI.parse(URI.encode(base_url.strip))
+      end
+
+
+      ################# Gets a list of cubes if nothing is mentioned #################
+      def list_cubes()
+        url = "#{base_url}/mondrian/cubecrudapi/cubes"
+        resp = Net::HTTP.get_response(URI.parse(url))
+        response_xml = resp.body.strip
+        parse_response(response_xml)
+        response_xml
       end
 
       ################# Gets a cube(s) based on the input #################
       ################# Gets a cube(s) if names of catalog and cube are provided ##################
-      ################# Gets a list of cubes if nothing is mentioned #################
-      ################# Gets the catalog definition if catalog_name is only provided #################
-
-      def get(catalog_name, cube_name)
+      def get_cube(catalog_name, cube_name)
         url = ""
         case
-          when ((catalog_name.nil? || catalog_name.empty?) && (cube_name.nil? || cube_name.empty?))
-            url = "#{base_url}/mondrian/cubecrudapi/cubes"
           when ((catalog_name.nil? || catalog_name.empty?) && !(cube_name.nil? || cube_name.empty?))
             url = "#{base_url}/mondrian/cubecrudapi/cube/#{cube_name}"
-          when (!(catalog_name.nil? || catalog_name.empty?) && (cube_name.nil? || cube_name.empty?))
-            url = "#{base_url}/mondrian/cubecrudapi/catalog/#{catalog_name}"
           else
             url = "#{base_url}/mondrian/cubecrudapi/cube/#{catalog_name}/#{cube_name}"
         end
@@ -55,12 +58,21 @@ module Mondrian
         response_xml
       end
 
-      def create(catalog_name,cube_name, connect_string)
+      ################# Gets the catalog definition if catalog_name is only provided #################
+      def get_catalog(catalog_name)
+        url = "#{base_url}/mondrian/cubecrudapi/catalog/#{catalog_name}"
+        resp = Net::HTTP.get_response(URI.parse(url))
+        response_xml = resp.body.strip
+        parse_response(response_xml)
+        response_xml
+      end
+
+      def create(catalog_name, cube_name, connect_string)
         xml = prepare_request(cube_name, connect_string)
         put_path="#{@url.path}/mondrian/cubecrudapi/putcube/#{catalog_name}/#{cube_name}"
         req = Net::HTTP::Put.new(put_path, initheader = {'Content-Type' => 'text/plain'})
         req.body = xml
-        resp = Net::HTTP.new(@url.host, @url.port).start {|http| http.request(req)}
+        resp = Net::HTTP.new(@url.host, @url.port).start { |http| http.request(req) }
         resp.body.strip
       end
 
@@ -69,19 +81,23 @@ module Mondrian
         put_path="#{@url.path}/mondrian/cubecrudapi/catalog/#{catalog_name}"
         req = Net::HTTP::Put.new(put_path, initheader = {'Content-Type' => 'text/plain'})
         req.body = xml
-        resp = Net::HTTP.new(@url.host, @url.port).start {|http| http.request(req)}
-        resp.body.strip
+        resp = Net::HTTP.new(@url.host, @url.port).start { |http| http.request(req) }
+        if resp.body.strip.include?("Catalog creation was successful")
+          true
+        else
+          false
+        end
       end
 
       def update(catalog_name, cube_name, xml)
         put_path="#{@url.path}/mondrian/cubecrudapi/putcube/#{catalog_name}/#{cube_name}"
-        req = Net::HTTP::Put.new(put_path, initheader = { 'Content-Type' => 'text/plain'})
+        req = Net::HTTP::Put.new(put_path, initheader = {'Content-Type' => 'text/plain'})
         req.body = xml
-        resp = Net::HTTP.new(@url.host, @url.port).start {|http| http.request(req) }
+        resp = Net::HTTP.new(@url.host, @url.port).start { |http| http.request(req) }
         resp.body.strip
       end
 
-      def delete(catalog_name,cube_name)
+      def delete(catalog_name, cube_name)
         del_path = "#{@url.path}/mondrian/cubecrudapi/deletecube/#{catalog_name}/#{cube_name}"
         http = Net::HTTP.new(@url.host, @url.port)
         resp = http.send_request('DELETE', del_path)
@@ -90,15 +106,15 @@ module Mondrian
 
       def invalidate_cache_catalog(catalog_name)
         put_path="#{@url.path}/mondrian/cubecrudapi/invalidatecache/catalog/#{catalog_name}"
-        req = Net::HTTP::Put.new(put_path, initheader = { 'Content-Type' => 'text/plain'})
-        resp = Net::HTTP.new(@url.host, @url.port).start {|http| http.request(req) }
+        req = Net::HTTP::Put.new(put_path, initheader = {'Content-Type' => 'text/plain'})
+        resp = Net::HTTP.new(@url.host, @url.port).start { |http| http.request(req) }
         resp.body.strip
       end
 
       def invalidate_cache_cube(cube_name)
         put_path="#{@url.path}/mondrian/cubecrudapi/invalidatecache/cube/#{cube_name}"
-        req = Net::HTTP::Put.new(put_path, initheader = { 'Content-Type' => 'text/plain'})
-        resp = Net::HTTP.new(@url.host, @url.port).start {|http| http.request(req) }
+        req = Net::HTTP::Put.new(put_path, initheader = {'Content-Type' => 'text/plain'})
+        resp = Net::HTTP.new(@url.host, @url.port).start { |http| http.request(req) }
         resp.body.strip
       end
 
