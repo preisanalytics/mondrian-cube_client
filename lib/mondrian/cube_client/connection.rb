@@ -104,6 +104,17 @@ module Mondrian
         resp.body.strip
       end
 
+      def delete_catalog(catalog_name)
+        del_path = "#{@url.path}/mondrian/cubecrudapi/catalog/#{catalog_name}"
+        http = Net::HTTP.new(@url.host, @url.port)
+        resp = http.send_request('DELETE', del_path)
+        if resp.body.strip.include?("Catalog successfully deleted")
+          true
+        else
+          false
+        end
+      end
+
       def invalidate_cache_catalog(catalog_name)
         put_path="#{@url.path}/mondrian/cubecrudapi/invalidatecache/catalog/#{catalog_name}"
         req = Net::HTTP::Put.new(put_path, initheader = {'Content-Type' => 'text/plain'})

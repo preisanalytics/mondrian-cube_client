@@ -39,6 +39,10 @@ Jdbc=jdbc:mysql://localhost:3306/foodmart?user=foodmart&#38;password=temp;Catalo
 
   let(:success_del_response) { "<output>Cube successfully deleted</output>" }
 
+  let(:success_catalog_del_response) { "<output>Catalog successfully deleted</output>" }
+
+  let(:fail_catalog_del_response) { "<output>Deletion failed</output>" }
+
   let(:success_invalidatecache_cube_response) { "<output>Cache clearance for Cube mycube is successful</output>" }
 
   let(:success_invalidatecache_catalog_response) { "<output>Cache clearance for Catalog mycat is successful</output>" }
@@ -133,6 +137,20 @@ Jdbc=jdbc:mysql://localhost:3306/foodmart?user=foodmart&#38;password=temp;Catalo
       stub_request(:delete, "http://validurl:8080/mondrian/cubecrudapi/deletecube/mycat/mycube").
           to_return(:status => 200, :body => success_del_response, :headers => {})
       expect(connection.delete('mycat', 'mycube').include?("successfully delete")).to be true
+    end
+  end
+
+  describe 'delete catalog' do
+    it "returns true on successful deletion of a catalog" do
+      stub_request(:delete, "http://validurl:8080/mondrian/cubecrudapi/catalog/mycat").
+          to_return(:status => 200, :body => success_catalog_del_response, :headers => {})
+      expect(connection.delete_catalog('mycat')).to be true
+    end
+
+    it "returns false on deletion failure of a catalog" do
+      stub_request(:delete, "http://validurl:8080/mondrian/cubecrudapi/catalog/mycat").
+          to_return(:status => 200, :body => fail_catalog_del_response, :headers => {})
+      expect(connection.delete_catalog('mycat')).to be false
     end
   end
 
