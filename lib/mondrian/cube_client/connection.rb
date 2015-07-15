@@ -2,7 +2,7 @@ require 'net/http'
 require 'nokogiri'
 require_relative "XmlParser"
 require 'pathname'
-require 'byebug'
+
 
 CREATE_CUBE_TEMPLATE_PATH = File.expand_path("../../../../data/mondrian/templates/cube_definition_template.xml", __FILE__)
 CREATE_CATALOG_TEMPLATE_PATH = File.expand_path("../../../../data/mondrian/templates/catalog_pgresconnect_definition_template.xml", __FILE__)
