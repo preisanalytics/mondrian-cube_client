@@ -147,13 +147,7 @@ module Mondrian
         @list_objs.push(response_xml)
       end
 
-      # def prepare_request_cube(cube_definition, connect_string)
-      #   cubedefinition = File.read(CREATE_CUBE_TEMPLATE_PATH)
-      #   cubedefinition.sub! '@connect_string@', connect_string
-      #   cubedefinition.sub! '@cube_definition@', cube_definition
-      #   cubedefinition
-      # end
-
+      
       def prepare_request_catalog(connect_string)
         catalog_definition = File.read(CREATE_CATALOG_TEMPLATE_PATH)
         catalog_definition.sub! '@connectstring@', connect_string
