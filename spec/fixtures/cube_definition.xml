@@ -1,13 +1,12 @@
-<CubeDefinition>
-  <DataSource>
-    JdbcDrivers=com.mysql.jdbc.Driver;Provider=Mondrian;Jdbc=jdbc:mysql://localhost:3306/foodmart?user=foodmart&#38;password=temp;
-  </DataSource>
-  <Cube name="Sales 212">
-    <Dimension name="Gender" foreignKey="customer_id">
-      <Hierarchy hasAll="true" allMemberName="All Gender" primaryKey="customer_id">
-        <Table name="customer"/>
-        <Level name="Gender" column="gender" uniqueMembers="true"/>
-      </Hierarchy>
-    </Dimension>
+<Schema name="postgres">
+  <Dimension name="Date dimensions">
+    <Hierarchy hasAll="true" name="Created at" primaryKey="id">
+      <Table name="&quot;date_dimensions&quot;" schema="&quot;public&quot;"/>
+      <Table name="&quot;time_dimensions&quot;" schema="&quot;public&quot;"/>
+      <Level column="minute" name="Minute" type="String" uniqueMembers="false"></Level>
+    </Hierarchy>
+  </Dimension>
+  <Cube name="postgres">
+    <Measure aggregator="max" column="price" formatString="#" name="max_price"/>
   </Cube>
-</CubeDefinition>
+</Schema>

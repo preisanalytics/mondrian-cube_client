@@ -112,23 +112,25 @@ Jdbc=jdbc:mysql://localhost:3306/foodmart?user=foodmart&#38;password=temp;Catalo
     end
   end
 
-  describe 'update cube' do
+  describe 'updates a cube' do
     it "updates a cube's definition" do
       stub_request(:put, "http://validurl:8080/mondrian/cubecrudapi/putcube/mycat/mycube").
-          with(:body => "<CubeDefinition>\n  <DataSource>\n    JdbcDrivers=com.mysql.jdbc.Driver;Provider=Mondrian;Jdbc=jdbc:mysql://localhost:3306/foodmart?user=foodmart&#38;password=temp;\n  </DataSource>\n  <Cube name=\"Sales 212\">\n    <Dimension name=\"Gender\" foreignKey=\"customer_id\">\n      <Hierarchy hasAll=\"true\" allMemberName=\"All Gender\" primaryKey=\"customer_id\">\n        <Table name=\"customer\"/>\n        <Level name=\"Gender\" column=\"gender\" uniqueMembers=\"true\"/>\n      </Hierarchy>\n    </Dimension>\n  </Cube>\n</CubeDefinition>",
-               :headers => {'Accept' => '*/*', 'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Content-Type' => 'text/plain', 'User-Agent' => 'Ruby'}).
+          with(:body => "<Schema name=\"postgres\">\n  <Dimension name=\"Date dimensions\">\n    <Hierarchy hasAll=\"true\" name=\"Created at\" primaryKey=\"id\">\n      <Table name=\"&quot;date_dimensions&quot;\" schema=\"&quot;public&quot;\"/>\n      <Table name=\"&quot;time_dimensions&quot;\" schema=\"&quot;public&quot;\"/>\n      <Level column=\"minute\" name=\"Minute\" type=\"String\" uniqueMembers=\"false\"></Level>\n    </Hierarchy>\n  </Dimension>\n  <Cube name=\"postgres\">\n    <Measure aggregator=\"max\" column=\"price\" formatString=\"#\" name=\"max_price\"/>\n  </Cube>\n</Schema>",
+               :headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Content-Type'=>'text/plain', 'User-Agent'=>'Ruby'}).
           to_return(:status => 200, :body => success_update_reponse, :headers => {})
 
-
-      expect(connection.update('mycat', 'mycube', cubedefinition).include?("Cube modified successfully")).to be true
+      expect(connection.update_cube('mycat', 'mycube', cubedefinition)).to be true
     end
   end
 
   describe 'creates cube' do
     it "creates a cube" do
-      stub_request(:put, "http://validurl:8080/mondrian/cubecrudapi/putcube/mycat/mycube").with(:body => "<CubeDefinition>\n  <DataSource><CubeDefinition>\n  <DataSource>\n    JdbcDrivers=com.mysql.jdbc.Driver;Provider=Mondrian;Jdbc=jdbc:mysql://localhost:3306/foodmart?user=foodmart&#38;password=temp;\n  </DataSource>\n  <Cube name=\"Sales 212\">\n    <Dimension name=\"Gender\" foreignKey=\"customer_id\">\n      <Hierarchy hasAll=\"true\" allMemberName=\"All Gender\" primaryKey=\"customer_id\">\n        <Table name=\"customer\"/>\n        <Level name=\"Gender\" column=\"gender\" uniqueMembers=\"true\"/>\n      </Hierarchy>\n    </Dimension>\n  </Cube>\n</CubeDefinition></DataSource>\n  <Cube name=\"mycube\">\n    <Dimension name=\"Gender\" foreignKey=\"customer_id\">\n      <Hierarchy hasAll=\"true\" allMemberName=\"All Gender\" primaryKey=\"customer_id\">\n        <Table name=\"customer\"/>\n        <Level name=\"Gender\" column=\"gender\" uniqueMembers=\"true\"/>\n      </Hierarchy>\n    </Dimension>\n  </Cube>\n</CubeDefinition>", :headers => {'Accept' => '*/*', 'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Content-Type' => 'text/plain', 'User-Agent' => 'Ruby'}).to_return(:status => 200, :body => success_create_response, :headers => {})
+      stub_request(:put, "http://validurl:8080/mondrian/cubecrudapi/putcube/mycat/mycube").
+          with(:body => "<Schema name=\"postgres\">\n  <Dimension name=\"Date dimensions\">\n    <Hierarchy hasAll=\"true\" name=\"Created at\" primaryKey=\"id\">\n      <Table name=\"&quot;date_dimensions&quot;\" schema=\"&quot;public&quot;\"/>\n      <Table name=\"&quot;time_dimensions&quot;\" schema=\"&quot;public&quot;\"/>\n      <Level column=\"minute\" name=\"Minute\" type=\"String\" uniqueMembers=\"false\"></Level>\n    </Hierarchy>\n  </Dimension>\n  <Cube name=\"postgres\">\n    <Measure aggregator=\"max\" column=\"price\" formatString=\"#\" name=\"max_price\"/>\n  </Cube>\n</Schema>",
+               :headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Content-Type'=>'text/plain', 'User-Agent'=>'Ruby'}).
+          to_return(:status => 200, :body => success_create_response, :headers => {})
 
-      expect(connection.create('mycat', 'mycube', cubedefinition).include?("successfully added")).to be true
+      expect(connection.create_cube('mycat', 'mycube', cubedefinition)).to be true
     end
   end
 
@@ -136,7 +138,7 @@ Jdbc=jdbc:mysql://localhost:3306/foodmart?user=foodmart&#38;password=temp;Catalo
     it "deletes a cube" do
       stub_request(:delete, "http://validurl:8080/mondrian/cubecrudapi/deletecube/mycat/mycube").
           to_return(:status => 200, :body => success_del_response, :headers => {})
-      expect(connection.delete('mycat', 'mycube').include?("successfully delete")).to be true
+      expect(connection.delete_cube('mycat', 'mycube').include?("successfully delete")).to be true
     end
   end
 
